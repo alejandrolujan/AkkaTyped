@@ -1,5 +1,7 @@
 *.class
 *.log
+bin
+libexec
 
 # sbt specific
 .cache
