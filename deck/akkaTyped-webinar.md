@@ -33,7 +33,8 @@ theme: Merriweather, 9
 
 - The problem with *untyped* actors
 - The basics of Akka Typed
-- Code samples
+- Replying to messages
+- Changing behavior
 - Limitations
 
 ---
@@ -90,7 +91,7 @@ class MyActor extends Actor {
 
 <br>
 
-`    case m => logger.warning("Did not handle message $m")`
+`    case m => logger.warning(s"Did not handle message $m")`
 
 ---
 
@@ -127,10 +128,14 @@ class MyActor extends Actor {
 
 # Behaviors
 
-- Defines how it reacts to the messages that it receives. 
-- Message may be: 
-  - What the Actor declares it can handle
-  - A system Signal (lifecycle event, etc)
+- Defines how to react to messages and signals. 
+- **Messages** are declared by the actor
+- **Signals** are lifecycle events, etc.
+
+<br>
+<br>
+
+*Similar to an actor's receive method*
 
 ---
 
@@ -139,20 +144,9 @@ class MyActor extends Actor {
 Defined in `akka.typed.ScalaDSL` :
 
 - **Static** for simple actors that don't change behaviors
-- **Total** for an actor defined by a total function
 - **Partial** for an actor defined by a partial function
-- **ContextAware** to access the actor `context`
-- **SelfAware** to access the `self`
-
----
-
-# System Signals
-
-- PreStart
-- PreRestart
-- PostStop
-- Terminated
-- Failed with decision: Resume, Restart, Stop, Escalate
+- **Total** for an actor defined by a total function
+- **Full** or **FullTotal** for processing signals
 
 ---
 
@@ -189,6 +183,23 @@ val system: ActorSystem[Message] = ActorSystem("EchoSystem", echo)
 // Note the Future is already typed
 val future: Future[Echo] = system ? (Message("Hola", _))
 ```
+
+---
+
+# Behavior *Decorators*
+
+- **ContextAware** to access the actor `context`
+- **SelfAware** to access the `self`
+
+---
+
+# System Signals
+
+- PreStart
+- PreRestart
+- PostStop
+- Terminated
+- Failed with decision: Resume, Restart, Stop, Escalate
 
 ---
 
@@ -244,19 +255,41 @@ val system = ActorSystem("PingPongSystem", main)
 
 ---
 
+# Changing Behavior
+
+- Some constructors allows us to change behavior:
+  - Full, FullTotal, Total, Partial
+- However, can't guarantee correct behavior at compilation time
+
+---
+
+# Changing Behavior
+
+```scala
+sealed trait UserCacheMessage
+case class AddUser(name: String) extends UserCacheMessage
+case class ListUsers(replyTo: ActorRef[Users]) extends UserCacheMessage
+
+def userCache(users: Set[String]): Behavior[UserCacheMessage] = 
+  Total[UserCacheMessage] {
+    case AddUser(name) =>
+      println(s"Adding user $name")
+      userCache(users + name)
+    case ListUsers(replyTo) =>
+      println(s"Sending back user set: $users")
+      replyTo ! Users(users)
+      Same
+    }
+```
 
 ---
 
 # Limitations
 
-TODO
-
-- Changing state through become 
+- Documentation is sparse
 - Actor distribution?
 - Routers?
 - Clustering?
-- Documentation is sparse
-- Why was this not the approach from the start?
 
 ---
 
