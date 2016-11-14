@@ -86,18 +86,29 @@ class MyActor extends Actor {
 
 - By default unhandled messages are posted to the Event Stream
 - Are you monitoring the Event Stream?
-- Alternatively, log on `case _`
+- Alternatively:
+
+<br>
+
+`    case m => logger.warning("Did not handle message $m")`
 
 ---
 
-# [fit] Why not use the compiler?
+# Why are Actors untyped?
+
+- Changing behavior (become)
+- Distribution
+
+---
+
+# [fit] Can we do better?
 
 ---
 
 # The goal
 
-- Create actors that expose the type of messages they can handle
-- Enforce at compile time
+## *Expose* message types
+## *Enforce* at compile time
 
 ---
 
@@ -116,12 +127,32 @@ class MyActor extends Actor {
 
 # Behaviors
 
+- Defines how it reacts to the messages that it receives. 
+- Message may be: 
+  - What the Actor declares it can handle
+  - A system Signal (lifecycle event, etc)
+
+---
+
+# Behaviors
+
 Defined in `akka.typed.ScalaDSL` :
 
 - **Static** for simple actors that don't change behaviors
+- **Total** for an actor defined by a total function
+- **Partial** for an actor defined by a partial function
 - **ContextAware** to access the actor `context`
 - **SelfAware** to access the `self`
-- **Total** for an actor defined by a total function
+
+---
+
+# System Signals
+
+- PreStart
+- PreRestart
+- PostStop
+- Terminated
+- Failed with decision: Resume, Restart, Stop, Escalate
 
 ---
 
@@ -130,7 +161,7 @@ Defined in `akka.typed.ScalaDSL` :
 Our *Echo* actor replies with the same payload we send
 
 ```scala
-// Incoming and outgoing message types
+// Incoming and outgoing message types (ignore signals)
 case class Message(payload: String, replyTo: ActorRef[Echo])
 case class Echo(payload: String)
 
@@ -207,6 +238,15 @@ val system = ActorSystem("PingPongSystem", main)
 
 ---
 
+# [fit] What about 
+# [fit] **context.become**
+# [fit] ?
+
+---
+
+
+---
+
 # Limitations
 
 TODO
@@ -216,6 +256,7 @@ TODO
 - Routers?
 - Clustering?
 - Documentation is sparse
+- Why was this not the approach from the start?
 
 ---
 
