@@ -87,6 +87,7 @@ class MyActor extends Actor {
 
 - By default unhandled messages are posted to the Event Stream
 - Are you monitoring the Event Stream?
+- Or did you turn on debug of unhandled messages?
 - Alternatively:
 
 <br>
@@ -99,6 +100,7 @@ class MyActor extends Actor {
 
 - Changing behavior (become)
 - Distribution
+- Serialization
 
 ---
 
@@ -284,12 +286,24 @@ def userCache(users: Set[String]): Behavior[UserCacheMessage] =
 
 ---
 
+# Summary 
+
+- Typed `ActorRef`s
+- Typed `ActorSystem`s
+- DSL for Behaviors
+- Reply addresses inside messages
+- Return behaviors instead of `context.become`
+
+---
+
 # Limitations
 
-- Documentation is sparse
-- Actor distribution?
-- Routers?
-- Clustering?
+- Still experimental
+  - Documentation is sparse
+- Open questions
+  - Actor distribution?
+  - Routers?
+  - Clustering?
 
 ---
 
